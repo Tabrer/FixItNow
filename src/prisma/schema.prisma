@@ -1,0 +1,66 @@
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  fullName  String
+  email     String    @unique
+  phone     String?
+  password  String // In a real app, this should be a hash
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+}
+
+model Worker {
+  id                String    @id @default(cuid())
+  fullName          String
+  email             String    @unique
+  phone             String
+  password          String // In a real app, this should be a hash
+  serviceType       String // e.g., plumber, electrician, mechanic
+  experience        String
+  yearsOfExperience Int
+  serviceArea       String
+  willingToTravel   Boolean   @default(false)
+  isAvailable       Boolean   @default(true)
+  idProofUrl        String?
+  certificationsUrl String?
+  isApproved        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  bookings          Booking[]
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  workerId     String
+  worker       Worker        @relation(fields: [workerId], references: [id])
+  serviceType  String
+  description  String?
+  status       BookingStatus @default(PENDING)
+  scheduledAt  DateTime
+  completedAt  DateTime?
+  price        Float?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
